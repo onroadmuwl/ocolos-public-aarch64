@@ -1,13 +1,11 @@
 # Ocolos: Online COde Layout OptimizationS
-Ocolos is the first _online_ code layout optimization system for unmodified applications written in unmanaged languages. Ocolos allows profile-guided optimization to be performed on a running process, instead of being performed offline and requiring the application to be re-launched. A description of how we implemented Ocolos and experimental results on MySQL-sysbench workloads are in [MICRO'22 paper](https://ieeexplore.ieee.org/document/9923868).
-
-For the demonstration purpose, we integrate `MySQL` and `sysbench` to Ocolos, so this version of Ocolos ONLY works with `MySQL`. 
+[Ocolos](https://github.com/upenn-acg/ocolos-public) is the first _online_ code layout optimization system(Intel64 platform) for unmodified applications written in unmanaged languages.  Our job is to support OCOLOS on the AArch64 platform.
 
 
 ## Prerequisites
 Please refer instructions from links or directly run commands listed below to install prerequisites: 
 - Linux Perf:`sudo apt-get install linux-tools-common linux-tools-generic` 
-- libunwind: [https://github.com/libunwind/libunwind](https://github.com/libunwind/libunwind) 
+- libunwind: [https://github.com/libunwind/libunwind](https://github.com/libunwind/libunwind) (1.7+ version)
 - Rust: `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh` 
 - boost_1_73_0 (for MySQL): [https://www.boost.org/users/history/version_1_73_0.html](https://www.boost.org/users/history/version_1_73_0.html) 
 - binutils (for objdump) [^1] : [https://ftp.gnu.org/gnu/binutils/](https://ftp.gnu.org/gnu/binutils/) 
@@ -147,6 +145,8 @@ Or if you prefer to build sysbench from source, please refer instructions in the
 
 ## Miscellaneous (notes about how to debug Ocolos)
 In `Makefile`'s `CXXFLAGS`,
+- if `-DAArch64` flag is added, Ocolos will support the AArch64 platform;
+- if `-DIntel64` flag is added, Ocolos will support the Intel64 platform;
 - if `-DTIME_MEASUREMENT` flag is added, Ocolos will print the execution time of code replacement;
 - if `-DMEASUREMENT` flag is added, Ocolos will print metrics such as:  
   * the number of functions on the call stack when target process is paused,
