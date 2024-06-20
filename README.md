@@ -10,7 +10,7 @@ Please refer instructions from links or directly run commands listed below to in
 - boost: `sudo apt-get install libboost-all-dev` 
 [^1]:If your `objdump` version is older than 2.27, please download the latest version of `binutils`.  
 
-## Download AOBO for mysql
+## Download AArch64BOS for mysql
 ```bash
 > git clone git@github.com:onroadmuwl/ocolos-public-aarch64.git
 ```
@@ -87,7 +87,7 @@ Or if you prefer to build sysbench from source, please refer instructions in the
 [https://github.com/akopytov/sysbench](https://github.com/akopytov/sysbench) 
 
 
-## Build & run AOBO
+## Build & run AArch64BOS
 - Navigate to `ocolos-public-aarch64` directory.  
 - In the file `config`, specify the absolute path for `nm`,`perf`,`objdump`,`llvm-bolt`,`perf2bolt` [^3]
    [^3]: if `nm`,`objdump` and `perf` are already in shell, it's OK that their paths are not specified in `config`. This can be checked by `which nm`, `which objdump` and `which perf`.
@@ -114,7 +114,7 @@ Or if you prefer to build sysbench from source, please refer instructions in the
    * After one run (~3 minutes), if you want to start another run, please first run `mysqladmin -u root shutdown` command to shutdown the current `MySQL` server process. 
 
 
-## Miscellaneous (notes about how to debug AOBO)
+## Miscellaneous (notes about how to debug AArch64BOS)
 In `Makefile`'s `CXXFLAGS`,
 - if `-DAArch64` flag is added, AOBO will support the AArch64 platform;
 - if `-DIntel64` flag is added, AOBO will support the Intel64 platform;
