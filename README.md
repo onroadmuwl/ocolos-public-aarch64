@@ -1,7 +1,5 @@
-# Ocolos: Online COde Layout OptimizationS
-[Ocolos](https://github.com/upenn-acg/ocolos-public) is the first _online_ code layout optimization system(Intel64 platform) for unmodified applications written in unmanaged languages.  Our job is to support OCOLOS on the AArch64 platform.
-
-
+# AOBO: An AArch64 Online Binary Optimizer
+[Ocolos](https://github.com/upenn-acg/ocolos-public) is the first _online_ code layout optimization system on the Intel64 platform for unmodified applications.  Building upon the OCOLOS framework, we develop the AOBO by redesigning crucial modules to support the AArch64 instruction set architecture. This work has been published in [ACM TACO](https://dl.acm.org/doi/abs/10.1145/3578360.3580255)
 ## Prerequisites
 Please refer instructions from links or directly run commands listed below to install prerequisites: 
 - Linux Perf:`sudo apt-get install linux-tools-common linux-tools-generic` 
@@ -12,20 +10,20 @@ Please refer instructions from links or directly run commands listed below to in
 - boost: `sudo apt-get install libboost-all-dev` 
 [^1]:If your `objdump` version is older than 2.27, please download the latest version of `binutils`.  
 
-## Download ocolos for mysql
+## Download AOBO for mysql
 ```bash
-> git clone git@github.com:upenn-acg/ocolos-public.git
+> git clone git@github.com:onroadmuwl/ocolos-public-aarch64.git
 ```
 
 
 ## Install BOLT 
 To use `llvm-bolt` and `perf2bolt` utilities, `BOLT` needs to be installed. \
+The BOLT has been updated to support online code replacement and to enhance the effectiveness of code layout optimization. \
 Please follow the commands below to install `BOLT` 
 ```bash
 > mkdir BOLT && cd BOLT
-> git clone git@github.com:upenn-acg/BOLT.git llvm-bolt
+> git clone git@github.com:onroadmuwl/llvm-project-bolt.git llvm-bolt
 > cd llvm-bolt
-> git checkout ocolos/cont-opt
 > cd ..
 > mkdir build && cd build
 > cmake -G "Unix Makefiles" ../llvm-bolt/llvm -DLLVM_TARGETS_TO_BUILD="X86;AArch64" -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_ASSERTIONS=ON -DLLVM_ENABLE_PROJECTS="clang;lld;bolt"
@@ -70,9 +68,9 @@ To initialize MySQL, run:
 In another terminal, run:
 ```bash
 > mysql -u root
-> CREATE USER 'ocolos'@'localhost';
-> GRANT ALL PRIVILEGES ON *.* TO 'ocolos'@'localhost' WITH GRANT OPTION;
-> CREATE DATABASE ocolos_db;
+> CREATE USER 'aobo'@'localhost';
+> GRANT ALL PRIVILEGES ON *.* TO 'aobo'@'localhost' WITH GRANT OPTION;
+> CREATE DATABASE aobo_db;
 > QUIT;
 > mysqladmin -u root shutdown
 ```
@@ -90,15 +88,15 @@ Or if you prefer to build sysbench from source, please refer instructions in the
 [https://github.com/akopytov/sysbench](https://github.com/akopytov/sysbench) 
 
 
-## Build & run Ocolos
-- Navigate to `ocolos-public` directory.  
+## Build & run AOBO
+- Navigate to `ocolos-public-aarch64` directory.  
 - In the file `config`, specify the absolute path for `nm`,`perf`,`objdump`,`llvm-bolt`,`perf2bolt` [^3]
    [^3]: if `nm`,`objdump` and `perf` are already in shell, it's OK that their paths are not specified in `config`. This can be checked by `which nm`, `which objdump` and `which perf`.
 - In `config`, please also specify the commands to run `MySQL server` and `sysbench`. The example commands are given in the config file. 
    * _Note_: the first argument of the command (a.k.a. the binary being invoked in the command) should be written in its full path. 
-- Please also remember to export the path of `ocolos-public`'s directory.
+- Please also remember to export the path of `ocolos-public-aarch64`'s directory.
 ```bash
-> export OCOLOS_PATH=/your/path/to/ocolos-public
+> export OCOLOS_PATH=/your/path/to/ocolos-public-aarch64
 ```
 - Then run the following commands:
 
@@ -113,57 +111,26 @@ Or if you prefer to build sysbench from source, please refer instructions in the
    * If libunwind's header files are stored in other places instead of `/usr/local/include`, you also need to edit Makefile and update it to the corresponding path. 
 - `./extract_call_sites` will produce 2 files which store all call sites information extracted from the target binary (a.k.a. `mysqld`) to the `tmp_data_dir` you specified in the config file. 
 - `./tracer` will invoke both `MySQL` server process and sysbench workloads `oltp_read_only`, and then perform code layout optimization during runtime. 
-   * The output of sysbench's throughput can be found in `sysbench_output.txt`. At about the 130th second, you will see a significant throughput improvement, since Ocolos has replace the code layout to be the optimized one at that time.
+   * The output of sysbench's throughput can be found in `sysbench_output.txt`. At about the 130th second, you will see a significant throughput improvement, since AOBO has replace the code layout to be the optimized one at that time.
    * After one run (~3 minutes), if you want to start another run, please first run `mysqladmin -u root shutdown` command to shutdown the current `MySQL` server process. 
 
 
-## UPDATES: Continuous Optimization - use profile from C1 to build new BOLTed binary
-- We've modified `BOLT` to make it support converting `perf.data` collected from C1 to be the `perf.fdata` that `llvm-bolt` can use.
-   * Here, we have the new terms `C0` & `C1`
-      + `C0` : The duration before `Ocolos`'s code replacement 
-      + `C1` : The duration after `Ocolos`'s code replacement 
-   * The `BOLT`'s code supports continuous optimization can be found [here](https://github.com/upenn-acg/BOLT).
-- In `C0`, the `perf2bolt` and `llvm-bolt` commands are changed to :
-```bash
-> perf2bolt -p perf_c0.data -o perf_c0.fdata mysqld
-> llvm-bolt mysqld -o mysqld_c0.bolt --enable-bat --enable-func-map-table -data=perf_c0.fdata -reorder-blocks=cache+ -reorder-functions=hfsort
-```
-- In `C1`, to make profile collected from `C1` work with `perf2bolt`, and then to produce C1's `mysqld.bolt` for next round of code replacement, the `perf2bolt` and `llvm-bolt` commands are changed to :
-   * In the `perf2bolt` command, `callstack_func.bin` & `BOLTed_bin_info.txt` are produced by `Ocolos` during C0's code replacement, since we need to pass some essential information from `Ocolos` to `BOLT`
-```bash
-> perf2bolt --ignore-build-id --cont-opt --call-stack-func=callstack_func.bin --bin-path-info=BOLTed_bin_info.txt -p perf_c1.data -o perf_c1.fdata mysqld_c0.bolt
-> llvm-bolt mysqld -o mysqld_c1.bolt --enable-bat --enable-func-map-table -data=perf_c1.fdata -reorder-blocks=cache+ -reorder-functions=hfsort
-```      
-- We also have a script to show how continuous optimization works 
-   * The script does the following things:
-      + shows how to use the profile collected from Ocolos' C1 + the `mysqld.bolt` produced from Ocolos' C0 to build a newly BOLTed binary
-      + runs the newly BOLTed binary with `oltp_read_only` to show the throughput
-   * The script can be found [Here](https://github.com/upenn-acg/ocolos-public/blob/main/scripts/C1_BOLTed_performance_test.sh). 
-      + before running the script, please change the paths in the script.
-      + also, please add `-DCONT_OPT` to `CXXFLAGS` in Makefile, and compile `Ocolos` again. 
-      + run this script `sh scripts/C1_BOLTed_performance_test.sh`
-
-## Miscellaneous (notes about how to debug Ocolos)
+## Miscellaneous (notes about how to debug AOBO)
 In `Makefile`'s `CXXFLAGS`,
-- if `-DAArch64` flag is added, Ocolos will support the AArch64 platform;
-- if `-DIntel64` flag is added, Ocolos will support the Intel64 platform;
-- if `-DTIME_MEASUREMENT` flag is added, Ocolos will print the execution time of code replacement;
-- if `-DMEASUREMENT` flag is added, Ocolos will print metrics such as:  
+- if `-DAArch64` flag is added, AOBO will support the AArch64 platform;
+- if `-DIntel64` flag is added, AOBO will support the Intel64 platform;
+- if `-DTIME_MEASUREMENT` flag is added, AOBO will print the execution time of code replacement;
+- if `-DMEASUREMENT` flag is added, AOBO will print metrics such as:  
   * the number of functions on the call stack when target process is paused,
   * the number of functions that are moved by `BOLT`,
   * the number of functions that are in the `BOLT` and original functions.
-- if `-DDEBUG_INFO` flag is added, Ocolos will print debug information such as:
+- if `-DDEBUG_INFO` flag is added, AOBO will print debug information such as:
   * the information about detailed behavior of tracer
   * the content in the call stack when the target process is paused
   * `-DDEBUG_INFO` can also be defined in `src/replace_function.hpp`. In this way, the ld_preload library will store all machine code per function it inserted to the target process as a `uint8_t` format array into a file. The file can be found in the `tmp_data_path` you defined in the config file. 
-- if `-DDEBUG` flag is added, after code replacement, Ocolos will first send `SIGSTOP` signal to target process and then resume the target process by `PTRACE_DETACH`. In this way, it allows debugging tools such as `GDB` to attach to the target process and observe what goes wrong after code replacement.
+- if `-DDEBUG` flag is added, after code replacement, AOBO will first send `SIGSTOP` signal to target process and then resume the target process by `PTRACE_DETACH`. In this way, it allows debugging tools such as `GDB` to attach to the target process and observe what goes wrong after code replacement.
 
 If the code replacement runs into a failure, you may want to do the following things to fix this problem
 - first add the `-DDEBUG_INFO` to `CXXFLAGS` in Makefile and compile again.
 - then run `./tracer` 
 - after `tracer` run into an error, you can check `{tmp_data_dir}/machine_code.txt`'s last few lines
-- if the last few lines shows that the error is caused by `mmap failed. file exists.`
-   + it indicates that the BOLTed text section overlaps with the heap of the running `mysqld` process. 
-   + to solve this problem, please comment out [this line](https://github.com/upenn-acg/ocolos-public/blob/main/src/replace_function.cpp#L232) in `replace_function.cpp`, and then compile Ocolos again.
-
-
