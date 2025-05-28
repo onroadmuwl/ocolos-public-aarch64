@@ -415,7 +415,7 @@ unordered_map<long, func_info> run_llvmbolt(const ocolos_env* ocolos_environ){
                     ocolos_environ->tmp_data_path+
                     "perf.fdata -o " +
                     ocolos_environ->bolted_binary_path + 
-                    " --enable-bat "+
+                    " --enable-bat --enable-aobo "+
                     " -reorder-blocks=ext-tsp "+
                     "-reorder-functions=hfsort+ "+
                     "-split-functions=0 "+
