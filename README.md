@@ -1,5 +1,5 @@
 # AOBO: An AArch64 Online Binary Optimizer
-[Ocolos](https://github.com/upenn-acg/ocolos-public) is the first _online_ code layout optimization system on the Intel64 platform for unmodified applications.  Building upon the OCOLOS framework, we develop the AOBO by redesigning crucial modules to support the AArch64 instruction set architecture. This work has been published in [ACM TACO](https://dl.acm.org/doi/abs/10.1145/3578360.3580255)
+[Ocolos](https://github.com/upenn-acg/ocolos-public) is the first _online_ code layout optimization system on the Intel64 platform for unmodified applications.  Building upon the OCOLOS framework, we develop the AOBO by redesigning crucial modules to support the AArch64 instruction set architecture. This work has been published in [ACM TACO](https://dl.acm.org/doi/10.1145/3736170)
 ## Prerequisites
 Please refer instructions from links or directly run commands listed below to install prerequisites: 
 - Linux Perf:`sudo apt-get install linux-tools-common linux-tools-generic` 
