@@ -1,25 +1,25 @@
-#perf=/usr/bin/perf
-#nm=/usr/local/bin/nm
+perf=perf
+nm=/usr/bin/nm
 objdump=/usr/bin/objdump
-llvm-bolt=/home/zyuxuan/BOLT-cont-opt/build/bin/llvm-bolt  
-perf2bolt=/home/zyuxuan/BOLT-cont-opt/build/bin/perf2bolt
-mysql=/usr/local/mysql/bin/mysql
+llvm-bolt=/home/wlmu/llvm-project-release-18.x/build/bin/llvm-bolt
+perf2bolt=/home/wlmu/llvm-project-release-18.x/build/bin/perf2bolt
+mysql=/home/wlmu/ocolos/mysql-server-8.0/build/bin/mysql
 
 
 ## NOTE: before using the directory you list here, please
 ## first make sure that the directory is created and has 
 ## the correct ownership.
 ## the path of directory that stores the temporary data 
-tmp_data_dir=/home/zyuxuan/ocolos_data/
+tmp_data_dir=/home/wlmu/ocolos-public-aarch64/ocolos_data/
 ## path where you put your replace_function.so
-lib=/home/zyuxuan/ocolos-public/
+lib=/home/wlmu/ocolos-public-aarch64/
 
 
 ## NOTE: the command you list here must have the binary 
 ## (aka. mysqld and sysbench) written in its absolute path.
 ## the command to run the server process
-server_cmd=/usr/local/mysql/bin/mysqld --user=ocolos --port=3306 --basedir=/usr/local/mysql --datadir=/usr/local/mysql/data --plugin-dir=/usr/local/mysql/lib/plugin --log-error=ocolos.err --pid-file=ocolos.pid
+server_cmd=/home/wlmu/ocolos/mysql-server-8.0/build/bin/mysqld --user=ocolos --port=3306 --basedir=/home/wlmu/ocolos/mysql-server-8.0/build --datadir=/home/wlmu/ocolos/mysql-server-8.0/data --plugin-dir=/home/wlmu/ocolos/mysql-server-8.0/build/lib/plugin --max-connections=1000 --log-error=ocolos.err --pid-file=ocolos.pid
 ## the command to initialize the db for your benchmark 
-init_benchmark_cmd=/usr/bin/sysbench /usr/share/sysbench/oltp_read_only.lua --threads=4 --mysql-host=127.0.0.1 --mysql-port=3306 --mysql-user=ocolos --mysql-db=ocolos_db --tables=4 --table-size=10000 --db-ps-mode=disable prepare
+init_benchmark_cmd=/usr/bin/sysbench /usr/share/sysbench/oltp_write_only.lua --mysql-host=127.0.0.1 --mysql-port=3306 --mysql-user=ocolos --mysql-db=ocolos_db --tables=10 --table-size=10000 --db-ps-mode=disable  prepare
 ## the command to run your benchmark 
-run_benchmark_cmd=/usr/bin/sysbench /usr/share/sysbench/oltp_read_only.lua --threads=4 --events=100000000 --time=180 --mysql-host=127.0.0.1 --mysql-port=3306 --mysql-user=ocolos --mysql-db=ocolos_db --tables=4 --table-size=10000 --range_selects=off --db-ps-mode=disable --report-interval=1 run
+run_benchmark_cmd=/usr/bin/sysbench /usr/share/sysbench/oltp_write_only.lua  --time=30000 --mysql-host=127.0.0.1 --mysql-port=3306 --mysql-user=ocolos --mysql-db=ocolos_db --tables=10 --table-size=10000 --range_selects=off --db-ps-mode=disable --report-interval=1 --percentile=90 --threads=48 run
