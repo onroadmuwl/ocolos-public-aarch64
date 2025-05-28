@@ -58,7 +58,6 @@ vector<unw_word_t> unwind_call_stack(vector<pid_t> tids){
       as = unw_create_addr_space(&_UPT_accessors, 0);
       if (!as) panic("unw_create_addr_space failed");
 
-      cout<<tids[i]<<endl;
       ui = (struct UPT_info*) _UPT_create(tids[i]);
       if (!ui) panic("_UPT_create failed");
       int rc = unw_init_remote(&c, as, ui);
@@ -266,8 +265,10 @@ bool ptrace_single_step_aarch64(pid_t tid, void *lib_addr, struct user_regs_stru
    old_regs = regs;
    regs.pc = (long)lib_addr;
    //regs.sp = ((regs.sp - 256) & 0xFFFFFFFFFFFFFFF0) - 8;
+#ifdef DEBUG_INFO
    printf("[debug]:old_regs.sp=%llx,reg.sp=%llx\n",old_regs.sp,regs.sp);
    printf("[debug]:old_regs.pc=%llx,reg.pc=%llx\n",old_regs.pc,regs.pc);
+#endif
    if (ptrace(PTRACE_SETREGSET, tid, (void *)NT_PRSTATUS, &io_regs))
    {
       fprintf(stderr, "Error getting register set: %s\n", strerror(errno));
