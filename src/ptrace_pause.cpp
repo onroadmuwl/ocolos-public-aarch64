@@ -75,16 +75,17 @@ vector<unw_word_t> unwind_call_stack(vector<pid_t> tids){
       }
 
       do {
-         unw_word_t  offset, ip, sp;
-         char fname[4096];
+         unw_word_t ip;
          unw_get_reg(&c, UNW_REG_IP, &ip);
+         call_stack.push_back(ip);
+
+         #ifdef DEBUG_INFO
+         unw_word_t  offset, sp;
+         char fname[4096];
          unw_get_reg(&c, UNW_REG_SP, &sp);
          fname[0] = '\0';
          (void) unw_get_proc_name(&c, fname, sizeof(fname), &offset);
          string f_name(fname);
-         call_stack.push_back(ip);
-
-         #ifdef DEBUG_INFO
          printf("[tracer] %p : (%s+0x%x) \n\t\t[sp=%p]\n", (void *)ip,fname,(int) offset,(void *)sp);
          #endif
       } while (unw_step(&c) > 0);
