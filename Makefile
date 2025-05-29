@@ -1,6 +1,6 @@
 CPP=g++
 CC=clang++
-CPPFLAGS=-I/home/wlmu/ocolos/libunwind1.7/include -g -Wall -O3 -DDEBUG_INFO -DTIME_MEASUREMENT -DAArch64 #-DIntel64
+CPPFLAGS=-I/home/wlmu/ocolos/libunwind1.7/include -g -Wall -O3 -DTIME_MEASUREMENT -DAArch64 #-DIntel64 -DDEBUG_INFO
 LINKER_FLAGS=-L/home/wlmu/ocolos/libunwind1.7/lib -lpthread -ldl
 LIBUNWIND_FLAGS=-lunwind -lunwind-ptrace -lunwind-generic
 BOOST_FLAGS=-lboost_serialization
