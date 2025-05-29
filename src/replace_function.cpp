@@ -14,9 +14,7 @@ int __libc_start_main(void *orig_main,int argc,char* argv[],
   orig_func_type orig_func;
   int ret = 0;
   orig_func = (orig_func_type) dlsym(RTLD_NEXT, "__libc_start_main");
-#ifdef Intel64
   sbrk(0x8000000); // works to shift the first allocation
-#endif  
   ret = orig_func(orig_main,argc,argv,
                   (fnptr_type)init_func,
                   (fnptr_type)fini_func,
