@@ -67,6 +67,18 @@ int main(){
       write_vtable(ocolos_environ.bolted_binary_path.c_str(), 
                    ocolos_environ.v_table_bin.c_str() );
 
+      // <starting address, call_sites_info>
+      unordered_map<long, call_site_info> call_sites;
+      ifstream filestream(ocolos_environ.call_sites_all_bin);
+      boost::archive::binary_iarchive archive(filestream);
+      archive >> call_sites;
+
+      // <target address, caller inst addresses>
+      unordered_map<long, vector<long> > call_sites_list;
+      ifstream filestream1(ocolos_environ.call_sites_list_bin);
+      boost::archive::binary_iarchive archive1(filestream1);
+      archive1 >> call_sites_list;
+
     
       #ifdef TIME_MEASUREMENT
       auto begin = std::chrono::high_resolution_clock::now();
@@ -90,7 +102,8 @@ int main(){
       // extract the machine code of each function
       // from the output of objdump
       vector<long> addr_unmoved_func_not_in_call_stack = get_keys_to_array(unmoved_func_not_in_call_stack); 
-      extract_call_sites(pFile1, bolted_func, func_in_call_stack, &ocolos_environ);
+      
+      inlined_extract_call_sites(pFile1, bolted_func, func_in_call_stack, call_sites, call_sites_list,&ocolos_environ);
 		
       write_functions(ocolos_environ.bolted_binary_path.c_str(), ocolos_environ.unmoved_func_bin.c_str(), addr_unmoved_func_not_in_call_stack.data(), addr_unmoved_func_not_in_call_stack.size());
 	
