@@ -1,6 +1,7 @@
 #include "infrastructure.hpp"
 #include "extract_machine_code.hpp"
 #include "ptrace_pause.hpp"
+#include "extract_vtable.hpp"
 
 using namespace std;
 
@@ -64,8 +65,11 @@ int main(){
                         addr_bolted_func.data(), 
                         addr_bolted_func.size() );
 
-      write_vtable(ocolos_environ.bolted_binary_path.c_str(), 
-                   ocolos_environ.v_table_bin.c_str() );
+      //write_vtable(ocolos_environ.bolted_binary_path.c_str(), 
+      //             ocolos_environ.v_table_bin.c_str() );
+      process_vtables(ocolos_environ.bolted_binary_path.c_str(), 
+                     to_string(target_pid), 
+                     ocolos_environ.v_table_bin.c_str());
 
       // <starting address, call_sites_info>
       unordered_map<long, call_site_info> call_sites;

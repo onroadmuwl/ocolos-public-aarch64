@@ -36,7 +36,7 @@
 #ifdef AArch64
 #include <libunwind-aarch64.h>
 #include <errno.h>
-#include <linux/elf.h>
+#include <elf.h>
 #endif
 
 #define panic(X) fprintf(stderr, #X "\n");
